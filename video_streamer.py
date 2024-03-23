@@ -1,13 +1,15 @@
+from queue import Queue
 from threading import Thread
 import cv2
 import time
-from queue import Queue
 
-from dust_detect import dusty_labels
+from dust_detect import dusty_labels, detect_blur_fft
+from create_mask import ROIMask
 
 
 class VideoStream:
     def __init__(self, cam_name, path, roi_points, transform=None, queue_size=128):
+        self.roi_comp = None
         self.cam_name = cam_name
         self.path = path
         self.stream = cv2.VideoCapture()
@@ -18,6 +20,7 @@ class VideoStream:
         self.frame_queue = Queue(maxsize=1)
         self.prev_frame = None
         self.roi_points = roi_points
+        self.roi_mask = None
         self.thread_read = Thread(target=self.read_frames, args=())
         self.thread_display = Thread(target=self.display_frames, args=())
         self.thread_check_stream = Thread(target=self.check_stream, args=())
@@ -25,9 +28,11 @@ class VideoStream:
         self.thread_display.daemon = True
         self.thread_check_stream.daemon = True
 
-    def start(self):
+    def start(self, roi_comp):
         self.stream.open(self.path)
         _, self.prev_frame = self.stream.read()
+        self.roi_mask = ROIMask(self.prev_frame.shape)
+        self.roi_comp = roi_comp
         self.thread_read.start()
         self.thread_display.start()
         self.thread_check_stream.start()
@@ -56,14 +61,15 @@ class VideoStream:
         while not self.stopped:
             if not self.Q.empty():
                 frame = self.Q.get()
-                self.frame_queue.put(frame)
+                detect_blur_fft(frame, size=60)
+                masked_frame = self.roi_mask.apply_masks(frame, self.roi_comp)
+                self.frame_queue.put(masked_frame)
             else:
                 time.sleep(0.1)
 
     def show_frame(self):
         if not self.frame_queue.empty():
             frame = self.frame_queue.get()
-            dusty_labels(frame)
             cv2.imshow(self.cam_name, frame)
             cv2.waitKey(1)
 
@@ -89,4 +95,3 @@ class VideoStream:
         self.thread_read.join()
         self.thread_display.join()
         self.thread_check_stream.join()
-

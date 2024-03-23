@@ -26,34 +26,24 @@ class ROIMask:
 
         return black_mask
 
-    def apply_masks(self, frame, roi_comp, back):
+    @staticmethod
+    def apply_masks(frame, roi_comp):
         """
         applies the mask to each ROI created in process_roi()
-        :param back: background subtraction
-        :param frame:
-        :param roi_comp:
-        :return:
+        :param frame: Original frame
+        :param roi_comp: Object containing ROIs
+        :return: Frame with only ROIs visible
         """
 
-        mask = np.zeros(frame.shape[:2], dtype=np.uint8)
+        # Create a blank frame to show only the ROIs
+        roi_frame = np.zeros_like(frame)
 
-        # Draw ROI polygons on the mask
+        # Draw ROI polygons directly on the frame
         for roi in roi_comp.rois:
             roi_points = roi.get_polygon_points()
-            cv2.fillPoly(mask, [roi_points], 255)  # Fill ROI area with white color
+            cv2.fillPoly(roi_frame, [roi_points], (255, 255, 255))  # Fill ROI area with white color
 
-        # apply mask to each ROI and combine them
-        masked_frame = apply_mask_to_rois(frame, mask, roi_comp.rois, back)
-
-        # creates a white frame to only process the ROI's
-        full_mask = np.ones(frame.shape[:2], dtype=np.uint8) * 255
-
-        # apply black mask to exclude processing outside the ROI's
-        for roi in roi_comp.rois:
-            black_mask_roi = self.apply_black_mask(roi)
-            full_mask = cv2.bitwise_and(full_mask, full_mask, mask=black_mask_roi)
-
-        # combine original frame with the masked ROI
-        final_frame = cv2.bitwise_or(cv2.bitwise_and(frame, frame, mask=full_mask), masked_frame)
+        # Combine original frame with the ROI frame
+        final_frame = cv2.bitwise_or(frame, roi_frame)
 
         return final_frame

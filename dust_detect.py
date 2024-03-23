@@ -1,4 +1,14 @@
 import numpy as np
+import cv2
+
+
+def dusty_labels(frame):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    (mean, blurry) = detect_blur_fft(gray, size=60)
+    text = "Dusty ({:.4f})" if blurry else "Not Dusty ({:.4f})"
+    text = text.format(mean)
+    color = (0, 0, 255) if blurry else (0, 255, 0)
+    cv2.putText(frame, text, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
 
 def detect_blur_fft(image, size=60, thresh=10):

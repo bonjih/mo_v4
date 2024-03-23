@@ -1,11 +1,23 @@
 import json
+import cv2
+
 from RoiMultiClass import ComposeROI
-from video_streamer import run_video
+from video_streamer import VideoStream
 
-with open('params.json', 'r') as f:
-    data = json.load(f)
 
-input_video_path = data["input_video_path"]
+def main():
+    with open('params.json', 'r') as f:
+        data = json.load(f)
 
-comp_roi = ComposeROI(data)
-run_video(comp_roi)
+    comp_roi = ComposeROI(data)
+    video_stream = VideoStream("YourCamName", comp_roi.video_file, comp_roi.roi_points)
+    video_stream.start()
+
+    while video_stream.running():
+        video_stream.show_frame()
+
+    cv2.destroyAllWindows()
+
+
+if __name__ == '__main__':
+    main()

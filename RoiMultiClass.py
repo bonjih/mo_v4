@@ -12,6 +12,7 @@ class ROI:
 
 class ComposeROI:
     def __init__(self, data):
+        self.roi_points = None
         self.rois = []
         self.thresholds = []
         self.video_file = None
@@ -24,7 +25,7 @@ class ComposeROI:
                 for thresh_key, thresh_value in value.items():
                     thresh = ROI(**thresh_value)
                     self.thresholds.append(thresh)
-            elif key == "input_video_path":  # double check for vid key
+            elif key == "input_video_path":
                 self.video_file = value
 
     def add_roi(self, roi):

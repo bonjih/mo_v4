@@ -11,7 +11,7 @@ def main():
 
     comp_roi = ComposeROI(data)
 
-    video_stream = VideoStream("YourCamName", comp_roi.video_file, comp_roi.roi_points)
+    video_stream = VideoStream("vid_name", comp_roi.video_file, comp_roi.roi_points)
     video_stream.start(comp_roi)
 
     while video_stream.running():

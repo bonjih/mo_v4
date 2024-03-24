@@ -34,5 +34,5 @@ def detect_blur_fft(frame, size=60, thresh=10):
 
     magnitude = 20 * np.log(np.abs(recon))
     m = np.mean(magnitude)
-    dusty_labels(frame, m, m <= thresh)
-    #return m, m <= thresh
+    #dusty_labels(frame, m, m <= thresh)
+    return m, m <= thresh

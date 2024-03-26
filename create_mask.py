@@ -1,49 +1,31 @@
 import cv2
 import numpy as np
 
-from process_roi import apply_mask_to_rois
+from thresh import apply_fft_to_roi
 
 
 class ROIMask:
     def __init__(self, frame_shape):
         self.frame_shape = frame_shape
 
-    def apply_black_mask(self, roi):
-        """
-        creates a black mask so to exclude processing outside the ROI
-        :param roi:
-        :return: black mask
-        """
-        # mask covering the entire frame
-        black_mask = np.zeros(self.frame_shape[:2], dtype=np.uint8)
-
-        # ROI polygon on the mask
-        roi_points = roi.get_polygon_points()
-        cv2.fillPoly(black_mask, [roi_points], (255, 255, 255))  # fill ROI area with white color
-
-        # invert the mask to cover the area outside the ROI
-        black_mask = cv2.bitwise_not(black_mask)
-
-        return black_mask
-
     @staticmethod
     def apply_masks(frame, roi_comp):
         """
-        applies the mask to each ROI created in process_roi()
+        Apply the mask to each ROI created in process_roi()
         :param frame: Original frame
         :param roi_comp: Object containing ROIs
-        :return: Frame with only ROIs visible
+        :return: Frame with only ROI regions outlined
         """
 
-        # Create a blank frame to show only the ROIs
-        roi_frame = np.zeros_like(frame)
-
-        # Draw ROI polygons directly on the frame
         for roi in roi_comp.rois:
             roi_points = roi.get_polygon_points()
-            cv2.fillPoly(roi_frame, [roi_points], (255, 255, 255))  # Fill ROI area with white color
+            cv2.polylines(frame, [roi_points], isClosed=True, color=(0, 255, 255), thickness=2)  # Draw ROI outline
 
-        # Combine original frame with the ROI frame
-        final_frame = cv2.bitwise_or(frame, roi_frame)
+            # Apply FFT to ROI
+            roi_filtered, mask = apply_fft_to_roi(frame, roi_points)
 
-        return final_frame
+            #Replace the original ROI in the frame with the filtered ROI
+            frame_roi = cv2.bitwise_and(frame, frame, mask=cv2.bitwise_not(mask))
+            frame_roi += cv2.cvtColor(roi_filtered.astype(np.uint8), cv2.COLOR_GRAY2BGR)
+
+        return frame

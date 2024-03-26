@@ -22,7 +22,7 @@ class VideoStream:
         self.prev_frame = None
         self.roi_points = roi_points
         self.roi_mask = None
-        self.save_video = True
+        self.save_video = False
         self.video_writer = None
         self.fps = None
         self.thread_read = Thread(target=self.read_frames, args=())
@@ -33,8 +33,9 @@ class VideoStream:
         self.thread_display.daemon = True
         self.thread_check_stream.daemon = True
 
-    def start(self, roi_comp):
+    def start(self, roi_comp, start_time_seconds=816):
         self.stream.open(self.path)
+        self.stream.set(cv2.CAP_PROP_POS_MSEC, start_time_seconds * 1.0e3)
         self.fps = self.stream.get(cv2.CAP_PROP_FPS)
         _, self.prev_frame = self.stream.read()
         self.roi_mask = ROIMask(self.prev_frame.shape)

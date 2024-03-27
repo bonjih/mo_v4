@@ -48,7 +48,7 @@ class VideoProcessor:
                 frame_roi += cv2.cvtColor(roi_filtered.astype(np.uint8), cv2.COLOR_GRAY2BGR)
 
                 # Add ROI information to the text
-                text = f"{roi_key}: Dusty ({mean:.4f})" if blurry else f"{roi_key}: Not Dusty ({mean:.4f})"
+                text = f"{roi_key}: Dusty ({mean:.4f}), Sum Features: {np.sum(features.flatten()):.4f}" if blurry else f"{roi_key}: Not Dusty ({mean:.4f}), Sum Features: {np.sum(features.flatten()):.4f}"
                 color = (0, 0, 255) if blurry else (0, 255, 0)
                 cv2.putText(frame_roi, text, (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 1)
 
@@ -64,7 +64,7 @@ class VideoProcessor:
                     bridge_text += f"{roi_key}, "
             bridge_text = bridge_text[:-2]
 
-            if sum_features < 800:
+            if sum_features < 430:
                 color = (0, 0, 255)
                 cv2.putText(frame_roi, f"Bridge ({bridge_text}): {rounded_sum_features}", (10, text_y + 30), cv2.FONT_HERSHEY_SIMPLEX,
                             0.7, color, 1)

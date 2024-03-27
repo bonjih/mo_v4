@@ -12,16 +12,17 @@ class ROI:
 
 class ComposeROI:
     def __init__(self, data):
-        self.roi_points = self.extract_roi_points(data)
-        self.rois = []
+        self.rois = {}  # Change rois to a dictionary
         self.thresholds = []
         self.video_file = None
 
+        roi_points = self.extract_roi_points(data)
+        for roi_key, roi_data in roi_points.items():  # Iterate over key-value pairs
+            roi = ROI(**roi_data)
+            self.rois[roi_key] = roi  # Add ROI object to dictionary using its key
+
         for key, value in data.items():
-            if key.startswith("roi"):
-                roi = ROI(**value)
-                self.rois.append(roi)
-            elif key == "thresholds":
+            if key == "thresholds":
                 for thresh_key, thresh_value in value.items():
                     thresh = ROI(**thresh_value)
                     self.thresholds.append(thresh)
@@ -30,17 +31,15 @@ class ComposeROI:
 
     @staticmethod
     def extract_roi_points(data):
-        roi_points = []
-        for key, value in data.items():
-            if key.startswith("roi"):
-                roi_points.append(value)
+        roi_points = data.get('roi_coords', {})
         return roi_points
 
-    def add_roi(self, roi):
-        self.rois.append(roi)
+    def add_roi(self, roi_key, roi):
+        self.rois[roi_key] = roi
 
     def add_threshold(self, thresh):
         self.thresholds.append(thresh)
 
     def __iter__(self):
-        return iter(self.rois + self.thresholds)
+        return iter(self.rois.values() + self.thresholds)
+

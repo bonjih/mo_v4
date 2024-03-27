@@ -1,23 +1,20 @@
 import json
-import cv2
 
 from RoiMultiClass import ComposeROI
-from video_streamer import VideoStream
+from video_streamer2 import VideoProcessor
 
 
 def main():
     with open('params.json', 'r') as f:
         data = json.load(f)
 
-    comp_roi = ComposeROI(data)
+    roi_config = ComposeROI(data)
 
-    video_stream = VideoStream("vid_name", comp_roi.video_file, comp_roi.roi_points)
-    video_stream.start(comp_roi)
+    video_path = roi_config.video_file
+    output_path = data.get("output_video_path", "crusher_bin_bridge_2.mkv")
 
-    while video_stream.running():
-        video_stream.show_frame()
-
-    cv2.destroyAllWindows()
+    video_processor = VideoProcessor(video_path, output_path, roi_config)
+    video_processor.process_video()
 
 
 if __name__ == '__main__':

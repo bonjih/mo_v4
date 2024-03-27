@@ -9,7 +9,7 @@ def dusty_labels(frame, mean, blurry):
     cv2.putText(frame, text, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
 
-def detect_blur_fft(frame, size=60, thresh=10):
+def detect_blur_fft(frame, size=60, thresh=2):
     """
     dust is treated as a blured image
     :param frame:

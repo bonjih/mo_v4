@@ -2,31 +2,30 @@
     "input_video_path": "data/crusher_bin_bridge2.mkv",
     "output_video_path": "output/crusher_bin_bridge_2.mkv",
     "output_image_path": "images/",
-    "process_seconds": 100,
     "is_watching": true,
     "is_save_video": true,
     "offset": 700,
 
     "roi_coords": {
         "roi_1": {
-            "x1": 700,
+            "x1": 350,
             "y1": 580,
-            "x2": 700,
-            "y2": 300,
-            "x3": 1200,
-            "y3": 300,
-            "x4": 1200,
+            "x2": 350,
+            "y2": 400,
+            "x3": 800,
+            "y3": 400,
+            "x4": 800,
             "y4": 580
         },
         "roi_2": {
-            "x1": 700,
-            "y1": 250,
-            "x2": 700,
-            "y2": 30,
-            "x3": 1200,
-            "y3": 30,
-            "x4": 1200,
-            "y4": 250
+            "x1": 400,
+            "y1": 350,
+            "x2": 400,
+            "y2": 200,
+            "x3": 800,
+            "y3": 200,
+            "x4": 800,
+            "y4": 380
         }
 
     },
@@ -36,5 +35,9 @@
             "t0": 360000.0,
             "t1": 500000.0
         }
+    },
+        "dust": {
+            "size": 60,
+            "thresh": 2
     }
 }

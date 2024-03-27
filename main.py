@@ -2,6 +2,7 @@ import json
 import os
 
 from RoiMultiClass import ComposeROI
+from process_roi import FrameProcessor
 from video_stream2 import VideoProcessor
 
 
@@ -9,8 +10,12 @@ def main():
     with open('params.json', 'r') as f:
         data = json.load(f)
 
+    dust_size = data.get("dust", {}).get("size", 60)
+    dust_thresh = data.get("dust", {}).get("thresh", 2)
+
     roi_config = ComposeROI(data)
     video_path = roi_config.video_file
+    FrameProcessor(roi_config, dust_size=dust_size, dust_thresh=dust_thresh)
 
     if not os.path.exists(video_path) or not os.path.isfile(video_path):
         print("Input video path or file does not exist.")

@@ -1,39 +1,40 @@
-import numpy as np
 import cv2
+import numpy as np
+
+from dust_detect import detect_blur_fft
+from thresh import apply_fft_to_roi
 
 
-def apply_processed_mask(frame, mask, roi):
-    """
-    applies the processed mask to the ROI
-    :param frame:
-    :param mask:
-    :param roi:
-    :return:
-    """
-    masked_frame = frame.copy()
-    roi_points = roi.get_polygon_points()
-    cv2.polylines(masked_frame, [roi_points], True, (255, 0, 0), 1)
-    masked_frame = cv2.bitwise_and(masked_frame, masked_frame, mask=mask)
-    return masked_frame
+class FrameProcessor:
+    def __init__(self, roi_comp):
+        self.roi_comp = roi_comp
 
+    def process_frame(self, frame):
+        frame_roi = frame.copy()
+        text_y = 25  # Starting y-coordinate for text
 
-def apply_mask_to_rois(frame, mask, rois):
-    """
-    Applies mask to each ROI and combines them.
+        for idx, roi_key in enumerate(self.roi_comp.rois, start=1):
+            roi = self.roi_comp.rois[roi_key]
+            roi_points = roi.get_polygon_points()
+            roi_filtered, mask, features = apply_fft_to_roi(frame, roi_points)
+            mean, blurry = detect_blur_fft(frame_roi, size=60, thresh=10)
 
-    :param back: Background subtraction
-    :param frame: Original frame
-    :param mask: Mask to apply
-    :param rois: List of ROIs
-    :return: Combined masked frame
-    """
+            frame_roi = cv2.bitwise_and(frame_roi, frame_roi, mask=cv2.bitwise_not(mask))
+            frame_roi += cv2.cvtColor(roi_filtered.astype(np.uint8), cv2.COLOR_GRAY2BGR)
 
-    # Initialise blank masked frame
-    masked_frame = np.zeros_like(frame)
+            # Add ROI key to Dusty/Not Dusty text
+            dusty_text = f"{roi_key}: Dusty ({mean:.4f})" if blurry else f"{roi_key}: Not Dusty ({mean:.4f})"
+            color = (0, 0, 255) if blurry else (0, 255, 0)
+            cv2.putText(frame_roi, dusty_text, (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 1)
 
-    # apply mask to each ROI and combine them
-    for roi in rois:
-        masked_frame_roi = apply_processed_mask(masked_frame, mask, roi)
-        masked_frame = cv2.bitwise_or(masked_frame, masked_frame_roi)
+            # Add Bridge/No Bridge text based on sum features
+            sum_features = np.sum(features.flatten())
+            rounded_sum_features = round(sum_features, 4)
+            bridge_text = f"{roi_key}: Bridge" if (idx == 1 and sum_features < 800) else f"{roi_key}: No Bridge"
+            bridge_text += f" ({rounded_sum_features})"
+            cv2.putText(frame_roi, bridge_text, (10, text_y + 30), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.7, color, 1)
 
-    return masked_frame
+            text_y += 60  # Increment y-coordinate for next ROI text
+
+        return frame_roi

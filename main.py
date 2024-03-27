@@ -1,7 +1,7 @@
 import json
 
 from RoiMultiClass import ComposeROI
-from video_streamer2 import VideoProcessor
+from video_stream2 import VideoProcessor
 
 
 def main():

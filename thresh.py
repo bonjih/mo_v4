@@ -1,19 +1,6 @@
 import numpy as np
 import cv2
 
-from dust_detect import detect_blur_fft
-
-
-def process_rois(frame, roi_points):
-    for roi in self.roi_comp.rois:
-        roi_points = roi.get_polygon_points()
-
-        roi_filtered, mask, features = apply_fft_to_roi(frame, roi_points)
-        frame_roi = cv2.bitwise_and(frame_roi, frame_roi, mask=cv2.bitwise_not(mask))
-        frame_roi += cv2.cvtColor(roi_filtered.astype(np.uint8), cv2.COLOR_GRAY2BGR)
-
-        return frame_roi
-
 
 def apply_masks(frame, roi_comp):
     """

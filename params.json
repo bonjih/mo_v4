@@ -1,18 +1,12 @@
 {
-    "input_video_path": "data/crusher_bin_bridge.mkv",
-    "output_video_dir": "output/",
-    "output_image_dir": "images/",
-    "output_df_path": "df/data_dump.parquet",
-    "daytime": true,
+    "input_video_path": "data/crusher_bin_bridge2.mkv",
+    "output_video_path": "output/crusher_bin_bridge_2.mkv",
+    "output_image_path": "images/",
     "process_seconds": 100,
     "is_watching": true,
-    "is_keep_video": true,
-    "addlabels": ["pos_msec", "auto1sec", "thresh", "bridge status"],
-    "autocorrelation": {
-        "delta": 23,
-        "thresholds": [25000.0, 50000.0, 100000.0, 250000.0, 500000.0, 1000000.0]
-    },
+    "is_save_video": true,
     "offset": 700,
+
     "roi_coords": {
         "roi_1": {
             "x1": 700,
@@ -26,13 +20,13 @@
         },
         "roi_2": {
             "x1": 700,
-            "y1": 200,
+            "y1": 250,
             "x2": 700,
             "y2": 30,
             "x3": 1200,
             "y3": 30,
             "x4": 1200,
-            "y4": 200
+            "y4": 250
         }
 
     },

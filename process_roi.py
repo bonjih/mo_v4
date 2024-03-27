@@ -25,8 +25,10 @@ class FrameProcessor:
             text_y += 30
 
             for roi_key in self.roi_comp.rois:
+
                 roi = self.roi_comp.rois[roi_key]
                 roi_points = roi.get_polygon_points()
+                print(roi_points[0:1][0][-1])
                 roi_filtered, mask, features = apply_fft_to_roi(frame, roi_points)
                 frame_roi = cv2.bitwise_and(frame_roi, frame_roi, mask=cv2.bitwise_not(mask))
                 frame_roi += cv2.cvtColor(roi_filtered.astype(np.uint8), cv2.COLOR_GRAY2BGR)
@@ -38,7 +40,7 @@ class FrameProcessor:
                     bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f})"
                 elif 250 <= sum_features < 400:
                     bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f})"
-                elif 400 <= sum_features < 500:
+                elif 310 <= sum_features < 500:
                     bridge_text = f"{roi_key}: Bridge ({sum_features:.4f})"
                 else:
                     bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f})"
@@ -47,11 +49,12 @@ class FrameProcessor:
                 bridge_color = (0, 0, 255) if "Bridge" in bridge_text else (0, 255, 0)
 
                 cv2.putText(frame_roi, bridge_text, (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, bridge_color, 1)
+                # display which roi
+                cv2.putText(frame_roi, roi_key, (roi_points[0:1][0][-1], roi_points[0:1][0][-1]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, bridge_color, 1)
 
                 text_y += 30
 
             return frame_roi
 
         else:
-
             return frame_roi

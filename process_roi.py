@@ -71,8 +71,8 @@ class FrameProcessor:
                 bridge_color = (0, 0, 255) if "Bridge" in bridge_text else (0, 255, 0)
                 cv2.putText(frame_roi, bridge_text, (10, text_y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, bridge_color, 1)
 
-            cv2.putText(frame_roi, roi_key, (roi_points[0:1][0][-1], roi_points[0:1][0][-1]),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
+            cv2.putText(frame_roi, roi_key, (roi_points[1:2, 0:1][-1][-1], roi_points[1:2, 1:][-1][-1]),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 1)
 
             text_y += 30
 

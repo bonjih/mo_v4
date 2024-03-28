@@ -3,7 +3,7 @@ import os
 
 from RoiMultiClass import ComposeROI
 from process_roi import FrameProcessor
-from video_stream2 import VideoProcessor
+from video_streamer import VideoProcessor
 
 
 def main():
@@ -12,10 +12,14 @@ def main():
 
     dust_size = data.get("dust", {}).get("size", 60)
     dust_thresh = data.get("dust", {}).get("thresh", 2)
+    audit_path = data.get("output_audit_path", None)
 
     roi_config = ComposeROI(data)
     video_path = roi_config.video_file
-    FrameProcessor(roi_config, dust_size=dust_size, dust_thresh=dust_thresh)
+    FrameProcessor(roi_config,
+                   dust_size=dust_size,
+                   dust_thresh=dust_thresh,
+                   audit_path=audit_path)
 
     if not os.path.exists(video_path) or not os.path.isfile(video_path):
         print("Input video path or file does not exist.")

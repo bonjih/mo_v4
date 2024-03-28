@@ -2,9 +2,11 @@
     "input_video_path": "data/crusher_bin_bridge2.mkv",
     "output_video_path": "output/crusher_bin_bridge_2.mkv",
     "output_image_path": "images/",
+    "output_audit_path": "output/audit_data.csv",
     "is_watching": true,
     "is_save_video": true,
     "offset": 700,
+    "audit_results": true,
 
     "roi_coords": {
         "roi_1": {

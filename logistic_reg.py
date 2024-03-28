@@ -1,30 +1,40 @@
-from collections import deque
-
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+
+# Dictionary to store data for each ROI
+roi_data = {}
 
 
-def prepare_data(frames_deque):
-    # Convert deque to list and then extract features (X) and target values (y)
-    X = np.array([frame for frame in frames_deque])  # Features
-    y = np.array([frame_label for frame, frame_label in frames_deque])
-    print(y)
-    return X, y
+def perform_regression(roi_key, data):
+    global roi_data
 
+    # Check if the ROI key already exists in the dictionary
+    if roi_key not in roi_data:
+        roi_data[roi_key] = []
 
-def perform_regression(frames_deque):
-    # Step 1: Prepare data
-    X, y = prepare_data(list(frames_deque))
+    # Add the data to the corresponding ROI key in the dictionary
+    roi_data[roi_key].extend(data)
 
-    # Step 2: Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Check if enough data is available for regression (200 samples)
+    if len(roi_data[roi_key]) >= 200:
+        # Extract features (X) and target labels (y)
+        X = np.array([row[0] for row in roi_data[roi_key]]).reshape(-1, 1)
+        y = np.array([row[1] for row in roi_data[roi_key]])
 
-    # Step 3: Train the regression model
-    model = LinearRegression()
-    model.fit(X_train, y_train)
+        if np.any(y) and np.any(~y):
 
-    # Step 4: Evaluate the model
-    score = model.score(X_test, y_test)
+            # Split the data into training and testing sets
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    return model, score
+            # Train the logistic regression model
+            model = LogisticRegression()
+            model.fit(X_train, y_train)
+
+            # Evaluate the model
+            train_score = model.score(X_train, y_train)
+            test_score = model.score(X_test, y_test)
+
+            print(f"ROI: {roi_key}")
+            print("Train Accuracy:", train_score)
+            print("Test Accuracy:", test_score)

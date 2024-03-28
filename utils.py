@@ -40,7 +40,6 @@ def make_plot():
                     data[data['result_roi_2'] == result]['sum_features_roi_2'],
                     c=color, label=f'Result ROI 1: {result}')
 
-
     plt.legend()
     plt.xlabel('Time (ms)')
     plt.ylabel('Sum Features')
@@ -51,15 +50,16 @@ def make_plot():
 
 #make_plot()
 
+
 def make_histo(deque_roi):
     flattened_data = np.concatenate(deque_roi)
 
     normalized_data = (flattened_data - np.min(flattened_data)) / (np.max(flattened_data) - np.min(flattened_data))
-    print(normalized_data)
-    # # Plot histogram with normalized data
-    # plt.hist(normalized_data, bins=50, alpha=0.7)
-    # plt.xlabel('Values')
-    # plt.ylabel('Frequency')
-    # plt.title('Normalized Histogram of Deque Data')
-    # plt.grid(True)
-    # plt.show()
+
+    # Plot histogram with normalized data
+    plt.hist(normalized_data, bins=50, alpha=0.7)
+    plt.xlabel('Values')
+    plt.ylabel('Frequency')
+    plt.title('Normalized Histogram of Deque Data')
+    plt.grid(True)
+    plt.show()

@@ -8,38 +8,31 @@ params = global_params_variables.ParamsDict()
 ws = params.get_value('change_window')['size']
 
 
-def calculate_rate_of_change(frame1, frame2, roi_key, window_size):
+def calculate_rate_of_change(roi_frame1, roi_frame2, window_size):
     """
-    Calculate the rate of change of pixel intensities between two frames within specified windows.
+    Calculate the rate of change of pixel intensities within the ROI between two frames within specified windows.
 
     Parameters:
-        frame1 (numpy.ndarray): The first frame.
-        frame2 (numpy.ndarray): The second frame.
+        roi_frame1 (numpy.ndarray): The first frame within the ROI.
+        roi_frame2 (numpy.ndarray): The second frame within the ROI.
         window_size (tuple): A tuple (window_height, window_width) specifying the size of the window.
 
     Returns:
-        numpy.ndarray: An array containing the calculated rate of change for each window.
-
-    Note:
-        The mean pixel intensity difference is calculated for each window
+        tuple: A tuple containing the key ROI and the maximum rate of change within the ROI.
     """
-    gray_frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
-    gray_frame2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
-
-    frame_diff = cv2.absdiff(gray_frame1, gray_frame2)
+    frame_diff = cv2.absdiff(roi_frame1, roi_frame2)
 
     window_height, window_width = window_size
 
-    rate_of_change = []
+    max_rate_of_change = 0
 
-    for y in range(0, gray_frame1.shape[0], window_height):
-        for x in range(0, gray_frame1.shape[1], window_width):
+    for y in range(0, roi_frame1.shape[0], window_height):
+        for x in range(0, roi_frame1.shape[1], window_width):
             window = frame_diff[y:y + window_height, x:x + window_width]
-            rate_of_change.append(np.mean(window))
+            mean_diff = np.mean(window)
+            max_rate_of_change = max(max_rate_of_change, mean_diff)
 
-    max_value = np.max(rate_of_change)
-
-    return roi_key, max_value
+    return max_rate_of_change
 
 
 def extract_resize_roi(frame, roi_pts, target_size=(100, 100)):
@@ -87,7 +80,13 @@ def apply_fft_to_roi(frame, prev_frame, roi_coords):
             numpy.ndarray: Mask used for extracting the ROI.
             numpy.ndarray: Features extracted from the FFT-processed ROI.
         """
-    key_roi, max_window_val = calculate_rate_of_change(frame[1], prev_frame, frame[0], (ws, ws))
+
+    # TODO call this from somewhere else
+    max_window_val = calculate_rate_of_change(frame[1][roi_coords[:, 1].min():roi_coords[:, 1].max(),
+                                              roi_coords[:, 0].min():roi_coords[:, 0].max()],
+                                              prev_frame[roi_coords[:, 1].min():roi_coords[:, 1].max(),
+                                              roi_coords[:, 0].min():roi_coords[:, 0].max()],
+                                              (ws, ws))
 
     roi_gray, mask = extract_resize_roi(frame[1], roi_coords, target_size=(100, 100))
     roi_fft = np.fft.fft2(roi_gray)
@@ -97,4 +96,4 @@ def apply_fft_to_roi(frame, prev_frame, roi_coords):
     features = normalized_roi.reshape(-1, 1)
 
     resized = cv2.resize(roi_filtered, (frame[1].shape[1], frame[1].shape[0]))
-    return resized, mask, features, (key_roi, max_window_val)
+    return resized, mask, features, max_window_val

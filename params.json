@@ -6,7 +6,7 @@
     "output_dir": "output",
     "is_watching": true,
     "is_save_video": true,
-    "offset": 700,
+    "offset": 60,
     "audit_results": true,
 
     "roi_coords": {

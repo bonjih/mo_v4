@@ -29,6 +29,8 @@ class FrameProcessor:
         ts = ts / 1000
         frame_roi = frame.copy()
         text_y = 25
+        is_bridge = None
+        bridge_text = None
 
         deque_roi = deque(maxlen=200)
 
@@ -62,15 +64,19 @@ class FrameProcessor:
             if roi_key == 'roi_1':  # ts from roi_1
                 cv2.putText(frame_roi, f"TS(s): {ts}", (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
 
-            if sum_features < 14.4999:
-                bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f} {max_window_val})"
-                is_bridge = False
-            if 15.5000 <= sum_features < 25.0000:
-                bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val}"
-                is_bridge = True
-            else:
+            if max_window_val > 40:
                 bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f}) {max_window_val}"
                 is_bridge = False
+            else:
+                bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val}"
+                is_bridge = True
+
+            # if 13.5000 <= sum_features < 25.0000:
+            #     bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val}"
+            #     is_bridge = True
+            # elif sum_features < 13.4999 and max_window_val > 80:
+            #     bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f}) {max_window_val}"
+            #     is_bridge = False
 
             if not dusty:
                 bridge_color = (0, 0, 255) if "Bridge" in bridge_text else (0, 255, 0)

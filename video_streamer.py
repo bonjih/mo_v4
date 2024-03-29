@@ -15,7 +15,6 @@ class VideoProcessor:
 
     def process_video(self):
         out = None
-        prev_frame = None
         cap = cv2.VideoCapture(self.video_path)
         cap.set(cv2.CAP_PROP_POS_MSEC, self.offset * 1.0e3)
 

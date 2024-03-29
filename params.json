@@ -3,6 +3,7 @@
     "output_video_path": "output/crusher_bin_bridge_2.mkv",
     "output_image_path": "images/",
     "output_audit_path": "output/audit_data.csv",
+    "output_dir": "output",
     "is_watching": true,
     "is_save_video": true,
     "offset": 700,
@@ -41,5 +42,8 @@
         "dust": {
             "size": 60,
             "thresh": 2
+    },
+    "change_window": {
+            "size": 10
     }
 }

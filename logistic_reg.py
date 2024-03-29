@@ -23,7 +23,6 @@ def perform_regression(roi_key, data):
         y = np.array([row[1] for row in roi_data[roi_key]])
 
         if np.any(y) and np.any(~y):
-
             # Split the data into training and testing sets
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 

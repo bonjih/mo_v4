@@ -1,6 +1,13 @@
 import numpy as np
 import cv2
 
+import global_params_variables
+
+# setup
+params = global_params_variables.ParamsDict()
+size = params.get_value('dust')['size']
+thresh = params.get_value('dust')['thresh']
+
 
 def dusty_labels(frame, mean, blurry):
     text = "Dusty ({:.4f})" if blurry else "Not Dusty ({:.4f})"
@@ -9,7 +16,7 @@ def dusty_labels(frame, mean, blurry):
     cv2.putText(frame, text, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
 
-def detect_blur_fft(frame, size=60, thresh=2):
+def detect_blur_fft(frame):
     """
     dust is treated as a blured image
     :param frame:

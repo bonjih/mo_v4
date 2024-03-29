@@ -12,16 +12,21 @@ class ROI:
 
 class ComposeROI:
     def __init__(self, data):
-        self.rois = {}  # Change rois to a dictionary
+        self.rois = {}
         self.thresholds = []
         self.video_file = None
 
-        roi_points = self.extract_roi_points(data)
-        for roi_key, roi_data in roi_points.items():  # Iterate over key-value pairs
+        if isinstance(data, list):
+            data_dict = dict(data)
+        else:
+            data_dict = data
+
+        roi_points = self.extract_roi_points(data_dict)
+        for roi_key, roi_data in roi_points.items():
             roi = ROI(**roi_data)
             self.rois[roi_key] = roi  # Add ROI object to dictionary using its key
 
-        for key, value in data.items():
+        for key, value in data_dict.items():
             if key == "thresholds":
                 for thresh_key, thresh_value in value.items():
                     thresh = ROI(**thresh_value)
@@ -41,5 +46,4 @@ class ComposeROI:
         self.thresholds.append(thresh)
 
     def __iter__(self):
-        return iter(self.rois.values() + self.thresholds)
-
+        return iter(list(self.rois.values()) + self.thresholds)

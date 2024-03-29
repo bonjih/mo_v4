@@ -1,21 +1,21 @@
-from collections import deque
-
 import cv2
 from process_roi import FrameProcessor
 
 
 class VideoProcessor:
-    def __init__(self, video_path, output_dir, roi_comp, is_watching=False, is_save_video=False, offset=0):
+    def __init__(self, video_path, output_dir, roi_comp, prev_frame, is_watching=False, is_save_video=False, offset=0):
         self.video_path = video_path
         self.output_dir = output_dir
         self.roi_comp = roi_comp
+        self.prev_frame = prev_frame
         self.is_watching = is_watching
         self.is_save_video = is_save_video
         self.offset = offset
-        self.frame_processor = FrameProcessor(roi_comp)
+        self.frame_processor = FrameProcessor(roi_comp, prev_frame)
 
     def process_video(self):
         out = None
+        prev_frame = None
         cap = cv2.VideoCapture(self.video_path)
         cap.set(cv2.CAP_PROP_POS_MSEC, self.offset * 1.0e3)
 
@@ -26,13 +26,18 @@ class VideoProcessor:
             frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             out = cv2.VideoWriter(self.output_dir, fourcc, fps, (frame_width, frame_height))
 
+        _, prev_frame = cap.read()
+
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
 
+            if prev_frame is None:
+                prev_frame = frame
+
             ts = cap.get(cv2.CAP_PROP_POS_MSEC)
-            processed_frame = self.frame_processor.process_frame(frame, ts)
+            processed_frame = self.frame_processor.process_frame(frame, prev_frame, ts)
 
             if self.is_watching:
                 cv2.imshow('Filtered Frame ', processed_frame)

@@ -14,6 +14,8 @@ dust_size = params.get_value('dust')['size']
 dust_thresh = params.get_value('dust')['thresh']
 audit_path = params.get_value('output_audit_path')
 len_deque_features = params.get_value('offset')
+sum_feat = params.get_value('thresholds')['daytime']['sum_features']
+max_win_val = params.get_value('thresholds')['daytime']['max_window_val']
 
 deque_features = deque(maxlen=len_deque_features)
 audit_deque = deque(maxlen=len_deque_features)
@@ -29,7 +31,7 @@ class FrameProcessor:
         ts = ts / 1000
         frame_roi = frame.copy()
         text_y = 25
-        is_bridge = None
+        is_bridge = False
         bridge_text = None
 
         deque_roi = deque(maxlen=200)
@@ -64,11 +66,11 @@ class FrameProcessor:
             if roi_key == 'roi_1':  # ts from roi_1
                 cv2.putText(frame_roi, f"TS(s): {ts}", (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
 
-            if max_window_val > 40:
-                bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f}) {max_window_val}"
+            if sum_features > sum_feat and max_window_val > max_win_val:
+                bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val}"
                 is_bridge = False
             else:
-                bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val}"
+                bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f}) {max_window_val}"
                 is_bridge = True
 
             # if 13.5000 <= sum_features < 25.0000:

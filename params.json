@@ -1,12 +1,12 @@
 {
-    "input_video_path": "data/crusher_bin_bridge2.mkv",
-    "output_video_path": "output/crusher_bin_bridge_2.mkv",
+    "input_video_path": "data/crusher_bin_bridge.mkv",
+    "output_video_path": "output/crusher_bin_bridge_1.mkv",
     "output_image_path": "images/",
     "output_audit_path": "output/audit_data.csv",
     "output_dir": "output",
     "is_watching": true,
     "is_save_video": true,
-    "offset": 60,
+    "offset": 500,
     "audit_results": true,
 
     "roi_coords": {
@@ -34,9 +34,8 @@
     },
     "thresholds": {
         "daytime": {
-            "interval_seconds": 2,
-            "t0": 360000.0,
-            "t1": 500000.0
+            "sum_features": 15,
+            "max_window_val": 55
         }
     },
         "dust": {

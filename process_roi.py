@@ -36,7 +36,7 @@ class FrameProcessor:
         ts = ts / 1000
         frame_roi = frame.copy()
         text_y = 25
-        is_bridge = False
+
         psd_val = 0
 
         deque_roi = deque(maxlen=200)
@@ -73,33 +73,33 @@ class FrameProcessor:
             if len(audit_deque) >= len_deque_features:
                 psd_val = compute_psd(list(audit_deque))
 
-            audit_data.append([ts, sum_features, is_bridge, max_window_val, psd_val])  # for plotting
             audit_deque.append([ts, max_window_val])  # for psd
 
             if roi_key == 'roi_1':  # ts from roi_1
                 cv2.putText(frame_roi, f"TS(s): {ts:.3f}", (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255),
                             1)
+            if psd_val != 0:
+                if -14 <= psd_val < 0 and 111 <= max_window_val < 133:
+                    bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val:.4f} [{psd_val:.4f}]"
+                    is_bridge = 1
+                elif max_window_val < 110:
+                    bridge_text = f"{roi_key}: Potential Bridge ({sum_features:.4f}) {max_window_val:.4f}  [{psd_val:.4f}]"
+                    is_bridge = -1
+                else:
+                    bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f}) {max_window_val:.4f} [{psd_val:.4f}]"
+                    is_bridge = 0
 
-            if 111 <= max_window_val < 133 and psd_val < -14:
-                bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val:.4f} [{psd_val:.4f}]"
-                is_bridge = 1
-            elif max_window_val < 110:
-                bridge_text = f"{roi_key}: Potential Bridge ({sum_features:.4f}) {max_window_val:.4f}  [{psd_val:.4f}]"
-                is_bridge = -1
-            else:
-                bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f}) {max_window_val:.4f} [{psd_val:.4f}]"
-                is_bridge = 0
-
-            if not dusty:
-                bridge_color = (0, 0, 255) if "Bridge" in bridge_text else (0, 255, 0)
-                cv2.putText(frame_roi, bridge_text, (10, text_y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, bridge_color, 1)
-
+                if not dusty:
+                    bridge_color = (0, 0, 255) if "Bridge" in bridge_text else (0, 255, 0)
+                    cv2.putText(frame_roi, bridge_text, (10, text_y + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, bridge_color,
+                                1)
+                audit_data.append([ts, sum_features, is_bridge, max_window_val, psd_val])  # for plotting
             cv2.putText(frame_roi, roi_key, (roi_points[1:2, 0:1][-1][-1], roi_points[1:2, 1:][-1][-1]),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 1)
 
             text_y += 30
 
-            deque_features.append([sum_features, is_bridge])
+            # deque_features.append([sum_features, is_bridge])
 
         make_csv(audit_data, audit_path)
 

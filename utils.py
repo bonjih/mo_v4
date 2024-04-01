@@ -8,18 +8,19 @@ import matplotlib.pyplot as plt
 
 
 def make_csv(data, path):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    file_empty = not os.path.exists(path) or os.stat(path).st_size == 0
+    if data:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        file_empty = not os.path.exists(path) or os.stat(path).st_size == 0
 
-    data_out = pd.DataFrame({'time_roi_1': [data[0][0]], 'sum_features_roi_1': [data[0][1]],
-                             'result_roi_1': [data[0][2]], 'win_roi_1': [data[0][3]], 'psd_val_1': [data[0][4]],
-                             'time_roi_2': [data[1][0]], 'sum_features_roi_2': [data[1][1]],
-                             'result_roi_2': [data[1][2]], 'win_roi_2': [data[1][3]], 'psd_val_2': [data[1][4]]
-                             })
-    if file_empty:
-        data_out.to_csv(path, mode='w', index=False)
-    else:
-        data_out.to_csv(path, mode='a', header=False, index=False)
+        data_out = pd.DataFrame({'time_roi_1': [data[0][0]], 'sum_features_roi_1': [data[0][1]],
+                                 'result_roi_1': [data[0][2]], 'win_roi_1': [data[0][3]], 'psd_val_1': [data[0][4]],
+                                 'time_roi_2': [data[1][0]], 'sum_features_roi_2': [data[1][1]],
+                                 'result_roi_2': [data[1][2]], 'win_roi_2': [data[1][3]], 'psd_val_2': [data[1][4]]
+                                 })
+        if file_empty:
+            data_out.to_csv(path, mode='w', index=False)
+        else:
+            data_out.to_csv(path, mode='a', header=False, index=False)
 
 
 def make_plot():
@@ -53,7 +54,7 @@ def make_plot():
     plt.show()
 
 
-# make_plot()
+#make_plot()
 
 
 def make_histo():

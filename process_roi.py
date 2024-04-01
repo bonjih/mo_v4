@@ -80,7 +80,7 @@ class FrameProcessor:
                 cv2.putText(frame_roi, f"TS(s): {ts:.3f}", (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255),
                             1)
 
-            if 111 <= max_window_val < 130 and psd_val < 4:
+            if 111 <= max_window_val < 133 and psd_val < -14:
                 bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val:.4f} [{psd_val:.4f}]"
                 is_bridge = 1
             elif max_window_val < 110:

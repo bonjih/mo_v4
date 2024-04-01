@@ -23,23 +23,26 @@ def make_csv(data, path):
 
 
 def make_plot():
+    var1 = 'psd_val_1'
+    var2 = 'psd_val_2'
+
     plt.figure(figsize=(10, 6))
 
     data = pd.read_csv('./output/audit_data.csv')
 
     data['result_roi_1'] = data['result_roi_1'].astype(bool)
 
-    plt.plot(data['time_roi_1'], data['psd_val_1'], color='blue', label='Sum Features ROI 1')
-    plt.plot(data['time_roi_1'], data['psd_val_2'], color='green', label='Sum Features ROI 2')
+    plt.plot(data['time_roi_1'], data[var1], color='blue', label=var1)
+    plt.plot(data['time_roi_1'], data[var2], color='green', label=var2)
 
     for result, color in zip([False, True], ['yellow', 'red']):
         plt.scatter(data[data['result_roi_1'] == result]['time_roi_1'],
-                    data[data['result_roi_1'] == result]['psd_val_1'],
+                    data[data['result_roi_1'] == result][var1],
                     c=color, label=f'Result ROI 1: {result}')
 
     for result, color in zip([False, True], ['yellow', 'red']):
         plt.scatter(data[data['result_roi_2'] == result]['time_roi_1'],
-                    data[data['result_roi_2'] == result]['psd_val_2'],
+                    data[data['result_roi_2'] == result][var2],
                     c=color, label=f'Result ROI 2: {result}')
 
     plt.legend()
@@ -50,7 +53,7 @@ def make_plot():
     plt.show()
 
 
-#make_plot()
+# make_plot()
 
 
 def make_histo():
@@ -58,22 +61,22 @@ def make_histo():
     import pandas as pd
     from sklearn.preprocessing import MinMaxScaler
 
-    # Read the data from the CSV file
+    var1 = 'psd_val_1'
+    var2 = 'psd_val_2'
+
     data = pd.read_csv('./output/audit_data.csv')
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
 
-    # Histogram for sum_features_roi_1
-    axs[0].hist(data['sum_features_roi_1'], bins=50, color='blue', alpha=0.7)
-    axs[0].set_title('Sum Features ROI 1')
-    axs[0].set_xlabel('Sum Features ROI 1')
+    axs[0].hist(data[var1], bins=50, color='blue', alpha=0.7)
+    axs[0].set_title(var1)
+    axs[0].set_xlabel(var1)
     axs[0].set_ylabel('Frequency')
     axs[0].grid(True)
 
-    # Histogram for sum_features_roi_2
-    axs[1].hist(data['sum_features_roi_2'], bins=50, color='red', alpha=0.7)
-    axs[1].set_title('Sum Features ROI 2')
-    axs[1].set_xlabel('Sum Features ROI 2')
+    axs[1].hist(data[var2], bins=50, color='red', alpha=0.7)
+    axs[1].set_title(var2)
+    axs[1].set_xlabel(var2)
     axs[1].set_ylabel('Frequency')
     axs[1].grid(True)
 
@@ -81,9 +84,7 @@ def make_histo():
     plt.show()
 
 
-# make_histo()
-
-
+#make_histo()
 
 
 def plot_kde(data, ax, title):

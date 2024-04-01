@@ -2,8 +2,12 @@ import cv2
 import numpy as np
 from collections import deque
 
+from scipy.spatial import KDTree
+
 import global_params_variables
+from compute_psd import compute_psd
 from dust_detect import detect_blur_fft
+from test import detect_shapes_in_roi
 from thresh import apply_fft_to_roi
 from utils import make_csv
 
@@ -13,12 +17,13 @@ params = global_params_variables.ParamsDict()
 dust_size = params.get_value('dust')['size']
 dust_thresh = params.get_value('dust')['thresh']
 audit_path = params.get_value('output_audit_path')
-len_deque_features = params.get_value('offset')
+len_deque_features = params.get_value('deque_offset')
 sum_feat = params.get_value('thresholds')['daytime']['sum_features']
 max_win_val = params.get_value('thresholds')['daytime']['max_window_val']
 
 deque_features = deque(maxlen=len_deque_features)
 audit_deque = deque(maxlen=len_deque_features)
+psd_values = []
 
 
 class FrameProcessor:
@@ -32,11 +37,11 @@ class FrameProcessor:
         frame_roi = frame.copy()
         text_y = 25
         is_bridge = False
-        bridge_text = None
+        psd_val = 0
 
         deque_roi = deque(maxlen=200)
 
-        mean, dusty = detect_blur_fft(frame)
+        mean, dusty = detect_blur_fft(frame_roi)
         dusty_text = f"Dusty ({mean:.4f})" if dusty else f"Not Dusty ({mean:.4f})"
         dusty_color = (0, 0, 255) if dusty else (0, 255, 0)
 
@@ -47,9 +52,11 @@ class FrameProcessor:
         for roi_key in self.roi_comp.rois:
             roi = self.roi_comp.rois[roi_key]
             roi_points = roi.get_polygon_points()
+
             frame_roi = [roi_key, frame_roi]
 
             roi_filtered, mask, features, max_window_val = apply_fft_to_roi(frame_roi, prev_frame, roi_points)
+
             deque_roi.append(roi_filtered)
 
             frame_roi = cv2.bitwise_and(frame_roi[1], frame_roi[1], mask=cv2.bitwise_not(mask))
@@ -63,22 +70,25 @@ class FrameProcessor:
 
             sum_features = np.std(normalized_data.flatten()) * 100
 
+            if len(audit_deque) >= len_deque_features:
+                psd_val = compute_psd(list(audit_deque))
+
+            audit_data.append([ts, sum_features, is_bridge, max_window_val, psd_val])  # for plotting
+            audit_deque.append([ts, max_window_val])  # for psd
+
             if roi_key == 'roi_1':  # ts from roi_1
-                cv2.putText(frame_roi, f"TS(s): {ts}", (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 1)
+                cv2.putText(frame_roi, f"TS(s): {ts:.3f}", (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255),
+                            1)
 
-            if sum_features > sum_feat and max_window_val > max_win_val:
-                bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val}"
-                is_bridge = False
+            if 111 <= max_window_val < 130 and psd_val < 4:
+                bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val:.4f} [{psd_val:.4f}]"
+                is_bridge = 1
+            elif max_window_val < 110:
+                bridge_text = f"{roi_key}: Potential Bridge ({sum_features:.4f}) {max_window_val:.4f}  [{psd_val:.4f}]"
+                is_bridge = -1
             else:
-                bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f}) {max_window_val}"
-                is_bridge = True
-
-            # if 13.5000 <= sum_features < 25.0000:
-            #     bridge_text = f"{roi_key}: Bridge ({sum_features:.4f}) {max_window_val}"
-            #     is_bridge = True
-            # elif sum_features < 13.4999 and max_window_val > 80:
-            #     bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f}) {max_window_val}"
-            #     is_bridge = False
+                bridge_text = f"{roi_key}: No Bridge ({sum_features:.4f}) {max_window_val:.4f} [{psd_val:.4f}]"
+                is_bridge = 0
 
             if not dusty:
                 bridge_color = (0, 0, 255) if "Bridge" in bridge_text else (0, 255, 0)
@@ -89,10 +99,7 @@ class FrameProcessor:
 
             text_y += 30
 
-            audit_data.append([ts, sum_features, is_bridge, max_window_val])
             deque_features.append([sum_features, is_bridge])
-            audit_deque.append([sum_features, is_bridge])
-            # perform_regression(roi_key, list(deque_features))
 
         make_csv(audit_data, audit_path)
 

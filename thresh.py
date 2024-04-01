@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import math
 
 import global_params_variables
 
@@ -18,21 +19,22 @@ def calculate_rate_of_change(roi_frame1, roi_frame2, window_size):
         window_size (tuple): A tuple (window_height, window_width) specifying the size of the window.
 
     Returns:
-        tuple: A tuple containing the key ROI and the maximum rate of change within the ROI.
+        numpy.ndarray: A 2D array containing the rate of change for each pixel window.
     """
     frame_diff = cv2.absdiff(roi_frame1, roi_frame2)
-
     window_height, window_width = window_size
 
-    max_rate_of_change = 0
+    rate_of_change = np.zeros(
+        (math.ceil(roi_frame1.shape[0] / window_height), math.ceil(roi_frame1.shape[1] / window_width)))
 
     for y in range(0, roi_frame1.shape[0], window_height):
         for x in range(0, roi_frame1.shape[1], window_width):
-            window = frame_diff[y:y + window_height, x:x + window_width]
-            mean_diff = np.mean(window)
-            max_rate_of_change = max(max_rate_of_change, mean_diff)
+            window_diff = frame_diff[y:y + window_height, x:x + window_width]
+            mean_diff = np.max(window_diff)
 
-    return max_rate_of_change
+            rate_of_change[y // window_height, x // window_width] = mean_diff
+
+    return np.max(rate_of_change)
 
 
 def extract_resize_roi(frame, roi_pts, target_size=(100, 100)):

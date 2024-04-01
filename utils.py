@@ -31,20 +31,32 @@ def make_plot():
 
     data = pd.read_csv('./output/audit_data.csv')
 
-    data['result_roi_1'] = data['result_roi_1'].astype(bool)
+    # Mapping values to desired representation
+    data['result_roi_1'] = data['result_roi_1'].map({-1: False, 1: True, 0: 'POT'})
+    data['result_roi_2'] = data['result_roi_2'].map({-1: False, 1: True, 0: 'POT'})
 
     plt.plot(data['time_roi_1'], data[var1], color='blue', label=var1)
     plt.plot(data['time_roi_1'], data[var2], color='green', label=var2)
 
-    for result, color in zip([False, True], ['yellow', 'red']):
-        plt.scatter(data[data['result_roi_1'] == result]['time_roi_1'],
-                    data[data['result_roi_1'] == result][var1],
-                    c=color, label=f'Result ROI 1: {result}')
+    for result, color in zip([False, True, 'POT'], ['yellow', 'red', 'grey']):
+        if result != 'POT':
+            plt.scatter(data[data['result_roi_1'] == result]['time_roi_1'],
+                        data[data['result_roi_1'] == result][var1],
+                        c=color, label=f'Result ROI 1: {result}')
+        else:
+            plt.scatter(data[data['result_roi_1'] == result]['time_roi_1'],
+                        data[data['result_roi_1'] == result][var1],
+                        c=color, label=f'Result ROI 1: {result}', marker='x')
 
-    for result, color in zip([False, True], ['yellow', 'red']):
-        plt.scatter(data[data['result_roi_2'] == result]['time_roi_1'],
-                    data[data['result_roi_2'] == result][var2],
-                    c=color, label=f'Result ROI 2: {result}')
+    for result, color in zip([False, True, 'POT'], ['yellow', 'red', 'grey']):
+        if result != 'POT':
+            plt.scatter(data[data['result_roi_2'] == result]['time_roi_1'],
+                        data[data['result_roi_2'] == result][var2],
+                        c=color, label=f'Result ROI 2: {result}')
+        else:
+            plt.scatter(data[data['result_roi_2'] == result]['time_roi_1'],
+                        data[data['result_roi_2'] == result][var2],
+                        c=color, label=f'Result ROI 2: {result}', marker='x')
 
     plt.legend()
     plt.xlabel('Time (ms)')
@@ -52,7 +64,6 @@ def make_plot():
     plt.title('Sum Features ROI 1 and ROI 2 over Time')
 
     plt.show()
-
 
 #make_plot()
 
